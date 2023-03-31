@@ -1,5 +1,6 @@
 const {connection} = require("../database/config")
 const jwt = require("jsonwebtoken")
+const axios = require('axios')
 
 const Key_Token = 'Raulin'
 
@@ -28,25 +29,31 @@ const create = (req,res) => {
       );
 }
 
-const login = (req,res) =>{
+const login = async (req,res) =>{
   //console.log(req.body);
   const usuario = req.body.usuario
-  const password = req.body.password
-  if (usuario == 'Admin' && password == 'admin123') {
-    //res.status(200).send('credenciales correctas')
-    const token = jwt.sign(
-      {user:usuario,pass:password},
-      Key_Token,
-      {expiresIn:"2h"}
-    )
-    let nDatos = {usuario,password,token}
-    res.status(200).json(nDatos)
-  }else {
-    res.status(400).send("credenciales incorrectas")
+  const password = req.body.password 
+  try {
+    const response = await axios.get('http://localhost:8000/usuarios');
+    const usuarios = response.data;
+    //console.log(usuarios);
+    const verifiedData = usuarios.some(user => user.usuario === usuario && user.password === password);
+    //console.log(verifiedData);
+    
+    if (verifiedData) {
+      const token = jwt.sign(
+        {user:usuario,pass:password},
+        Key_Token,
+        {expiresIn:"2h"}
+      )
+      let nDatos = {usuario,password,token}
+      res.status(200).json(nDatos)
+    }else {
+      res.status(400).send("credenciales incorrectas")
+    }
+  } catch (error) {
+    console.error(error);
   }
-
-
-
 }
 
 module.exports = {all , create , login}
