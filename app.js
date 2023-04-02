@@ -1,7 +1,10 @@
 const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
+const dotenv = require('dotenv')
+dotenv.config()
 const {connection} = require('./database/config')
+
 
 const app = express();
 const vehiculos = require('./routes/vehiculos') 
